@@ -2,8 +2,9 @@ import {
   type AnimationProps,
   type UpdateAnimationProps,
   KeyMap,
-  SceneProps,
+  SceneProps
 } from "./animation.types";
+import { Sprite } from "../Sprite/Sprite";
 
 let isAnimationInProgress: boolean = false;
 
@@ -14,11 +15,15 @@ export function registerAnimations(scene: Phaser.Scene) {
     { key: "jump", start: 0, end: 1, imgKey: "playerJump" },
     { key: "fall", start: 0, end: 1, imgKey: "playerFall" },
     { key: "attack", start: 0, end: 5, imgKey: "playerAttack" },
+    { key: "death", start: 0, end: 5, imgKey: "playerDeath" },
+    { key: "take-hit", start: 0, end: 3, imgKey: "playerDeath" },
     { key: "idle-enemy", start: 0, end: 3, imgKey: "enemy", repeat: -1 },
     { key: "run-enemy", start: 0, end: 7, imgKey: "enemyRun" },
     { key: "jump-enemy", start: 0, end: 1, imgKey: "enemyJump" },
     { key: "fall-enemy", start: 0, end: 1, imgKey: "enemyFall" },
     { key: "attack-enemy", start: 0, end: 3, imgKey: "enemyAttack" },
+    { key: "death-enemy", start: 0, end: 6, imgKey: "enemyDeath" },
+    { key: "take-hit-enemy", start: 0, end: 2, imgKey: "enemyDeath" }
   ];
 
   // Loop through and create animations
@@ -32,7 +37,7 @@ function createAnimation(arg: AnimationProps & SceneProps) {
     key,
     frames: scene.anims.generateFrameNumbers(imgKey, { start, end }),
     frameRate,
-    repeat,
+    repeat
   });
 }
 
@@ -57,73 +62,50 @@ export function updateAnimation(args: UpdateAnimationProps) {
 function getInputStates({
   cursors,
   keys,
-  isPlayer,
+  isPlayer
 }: {
   cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   keys: KeyMap;
   isPlayer?: boolean;
 }) {
   return {
-    attack: isPlayer
-      ? Phaser.Input.Keyboard.JustDown(keys.SPACE)
-      : cursors.down.isDown,
+    attack: isPlayer ? Phaser.Input.Keyboard.JustDown(keys.SPACE) : cursors.down.isDown,
     jump: isPlayer ? Phaser.Input.Keyboard.JustDown(keys.W) : cursors.up.isDown,
     left: isPlayer ? keys.A.isDown : cursors.left.isDown,
-    right: isPlayer ? keys.D.isDown : cursors.right.isDown,
+    right: isPlayer ? keys.D.isDown : cursors.right.isDown
   };
 }
 
 function handleAttackAnimation(
-  sprite: Phaser.Physics.Arcade.Sprite & { isAttacking: boolean },
+  sprite: Sprite,
   inputStates: { attack: boolean },
   isPlayer?: boolean
 ) {
   if (!inputStates.attack) return false;
   isAnimationInProgress = true;
   sprite.isAttacking = true;
-  console.log(11);
-  sprite
-    .play(isPlayer ? "attack" : "attack-enemy", true)
-    .once("animationcomplete", () => {
-      isAnimationInProgress = false;
-      sprite.play(
-        sprite.body!.touching.down
-          ? isPlayer
-            ? "idle"
-            : "idle-enemy"
-          : isPlayer
-          ? "fall"
-          : "fall-enemy",
-        true
-      );
-      sprite.isAttacking = false;
-    });
 
+  sprite.play(isPlayer ? "attack" : "attack-enemy", true).once("animationcomplete", () => {
+    isAnimationInProgress = false;
+    sprite.isAttacking = false;
+  });
+  // sprite.play(isPlayer ? "take-hit" : "take-hit-enemy", true);
   return true;
 }
 
-function handleJumpAnimation(
-  sprite: Phaser.Physics.Arcade.Sprite,
-  inputStates: { jump: boolean },
-  isPlayer?: boolean
-) {
+function handleJumpAnimation(sprite: Sprite, inputStates: { jump: boolean }, isPlayer?: boolean) {
   if (!inputStates.jump || !sprite.body!.touching.down) return false;
 
   isAnimationInProgress = true;
   sprite.setVelocityY(-400);
-  sprite
-    .play(isPlayer ? "jump" : "jump-enemy", true)
-    .once("animationcomplete", () => {
-      isAnimationInProgress = false;
-    });
+  sprite.play(isPlayer ? "jump" : "jump-enemy", true).once("animationcomplete", () => {
+    isAnimationInProgress = false;
+  });
 
   return true;
 }
 
-function handleFallAnimation(
-  sprite: Phaser.Physics.Arcade.Sprite,
-  isPlayer?: boolean
-) {
+function handleFallAnimation(sprite: Sprite, isPlayer?: boolean) {
   if (sprite.body!.touching.down || sprite.body!.velocity.y <= 0) return false;
 
   sprite.play(isPlayer ? "fall" : "fall-enemy", true);
@@ -131,7 +113,7 @@ function handleFallAnimation(
 }
 
 function handleRunAnimation(
-  sprite: Phaser.Physics.Arcade.Sprite,
+  sprite: Sprite,
   inputStates: { left: boolean; right: boolean },
   isPlayer?: boolean
 ) {
@@ -150,25 +132,11 @@ function handleRunAnimation(
   return false;
 }
 
-function handleIdleAnimation(
-  sprite: Phaser.Physics.Arcade.Sprite,
-  isPlayer?: boolean
-) {
+function handleIdleAnimation(sprite: Sprite, isPlayer?: boolean) {
   if (sprite.body!.touching.down) {
     sprite.play(isPlayer ? "idle" : "idle-enemy", true);
   }
 }
-
-// function checkAttackOverlap(sprite: Phaser.Physics.Arcade.Sprite, isPlayer?: boolean) {
-//   this.physics.overlap(
-//     sprite.attackBox,  // Assuming sprite has attackBox
-//     this.enemy,        // The enemy you want to check the collision with
-//     (attackBox, enemy) => {
-//       if (sprite.isAttacking) {  // Only deal damage if the player is still attacking
-//         console.log("Attack hit!");
-//         enemy.takeDamage(10);  // Apply damage
-//         sprite.isAttacking = false;  // Reset after damage
-//       }
-//     }
-//   );
-// }
+export function handleDeathAnimation(sprite: Sprite, isPlayer?: boolean) {
+  sprite.play({ key: isPlayer ? "death" : "death-enemy", delay: 400 }, true);
+}

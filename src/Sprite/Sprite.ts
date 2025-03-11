@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import { KeyMap } from "../utils/animation.types";
-import { updateAnimation } from "../utils/animations"; // Assuming this handles animation updates
-
+import { updateAnimation, handleDeathAnimation } from "../utils/animations"; // Assuming this handles animation updates
+import { type AnimationProps } from "../utils/animation.types";
 export class Sprite extends Phaser.Physics.Arcade.Sprite {
   private keys: KeyMap;
   private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -9,7 +9,8 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
   public health: number;
   public isAttacking: boolean = false;
   public attackBox: Phaser.Physics.Arcade.Body;
-
+  public isDead: boolean = false;
+  // public animations: AnimationProps = [];
   constructor(
     scene: Phaser.Scene,
     x: number,
@@ -28,7 +29,7 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
     this.scene.add.existing(this);
     this.scene.physics.add.existing(this);
 
-    this.setScale(2, 2); // Scaling to fit your requirement
+    this.setScale(2, 2);
     this.body!.setSize(40, 70); // Adjust body size and offset
     this.setCollideWorldBounds(true);
 
@@ -41,39 +42,38 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
 
   // Method to handle animation and movement updates
   update() {
+    if (this.isDead) return;
     // Use updateAnimation function to handle animations and movemednt
     updateAnimation({
       cursors: this.cursors,
       sprite: this,
       keys: this.keys,
-      isPlayer: this.isPlayer,
+      isPlayer: this.isPlayer
     });
     const xOffset = this.isPlayer ? 50 : -150;
     this.attackBox.x = this.x + xOffset;
     this.attackBox.y = this.y;
-
-    console.log(this.health);
   }
   takeDamage(amount: number) {
     this.health -= amount;
+    console.log(this.health);
     if (this.health <= 0) {
       this.die();
     }
   }
-  die() {}
+  die() {
+    if (this.isDead) return;
+
+    this.isDead = true;
+
+    handleDeathAnimation(this, this.isPlayer);
+
+    // this.anims.stop();
+    // this.setTint(0xff0000); // Red tint when dead
+    this.body!.checkCollision.none = true; // Disable collisions
+    this.setVelocity(0, 0); // Stop all movement
+
+    // Emit death event with player identification
+    this.emit("died", { isPlayer: this.isPlayer });
+  }
 }
-
-// triggerAttack() {
-
-//   // Check overlap with opponent
-//   this.scene.physics.overlap(this.attackArea, this.isPlayer ? this.scene.enemy : this.scene.player, (hitbox, target) => {
-//     if (target && target.takeDamage) {
-//       target.takeDamage(10); // Example: reduce 10 health on hit
-//     }
-//   });
-
-//   // Deactivate the attack area after a short period
-//   this.scene.time.delayedCall(200, () => {
-//     this.attackArea.setAlpha(0); // Make it invisible again
-//   });
-// }

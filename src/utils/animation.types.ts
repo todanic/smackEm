@@ -1,3 +1,5 @@
+import { Sprite } from "../Sprite/Sprite";
+
 export interface SceneProps {
   scene: Phaser.Scene;
 }
@@ -15,14 +17,14 @@ export enum KeyBindings {
   A = Phaser.Input.Keyboard.KeyCodes.A,
   D = Phaser.Input.Keyboard.KeyCodes.D,
   W = Phaser.Input.Keyboard.KeyCodes.W,
-  SPACE = Phaser.Input.Keyboard.KeyCodes.SPACE,
+  SPACE = Phaser.Input.Keyboard.KeyCodes.SPACE
 }
 export type KeyMap = {
   [key in keyof typeof KeyBindings]: Phaser.Input.Keyboard.Key;
 };
 export type UpdateAnimationProps = {
   cursors: Phaser.Types.Input.Keyboard.CursorKeys;
-  sprite: Phaser.Physics.Arcade.Sprite;
+  sprite: Sprite;
   keys: KeyMap;
   isPlayer?: boolean;
 };
@@ -32,5 +34,5 @@ export enum AnimationType {
   Run,
   Jump,
   Fall,
-  Attack,
+  Attack
 }
