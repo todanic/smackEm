@@ -1,7 +1,7 @@
+// Preloads all necessary assets for the game, including background images,
+// player and enemy spritesheets for various animations (idle, run, jump, attack, etc.).
 export function preloadAssets(scene: Phaser.Scene) {
-  // Load background image
   scene.load.image("background", "/images/background.png");
-
   // Load player spritesheets
   scene.load.spritesheet("player", "/images/martial-hero/Sprites/Idle.png", {
     frameWidth: 200,
@@ -31,7 +31,6 @@ export function preloadAssets(scene: Phaser.Scene) {
     frameWidth: 200,
     frameHeight: 200
   });
-
   // Load enemy spritesheets
   scene.load.spritesheet("enemy", "/images/kenji/Idle.png", {
     frameWidth: 200,
@@ -62,3 +61,29 @@ export function preloadAssets(scene: Phaser.Scene) {
     frameHeight: 200
   });
 }
+
+export const playerConfig = {
+  animations: {
+    idle: "idle",
+    run: "run",
+    jump: "jump",
+    attack: "attack",
+    death: "death",
+    fall: "fall",
+    getHit: "take-hit"
+  },
+  spriteIndex: 0
+};
+
+export const enemyConfig = {
+  animations: {
+    idle: "idle-enemy",
+    run: "run-enemy",
+    jump: "jump-enemy",
+    attack: "attack-enemy",
+    death: "death-enemy",
+    fall: "fall-enemy",
+    getHit: "take-hit-enemy"
+  },
+  spriteIndex: 1
+};

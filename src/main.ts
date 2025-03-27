@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { registerAnimations } from "./utils/animations";
-import { preloadAssets } from "./utils/assets";
+import { preloadAssets, playerConfig, enemyConfig } from "./utils/assets";
 import { KeyMap } from "./utils/animation.types";
 import { Sprite } from "./Sprite/Sprite";
 
@@ -48,8 +48,11 @@ class Example extends Phaser.Scene {
       }) as KeyMap;
     }
 
-    this.player = new Sprite(this, 100, 0, this.keys, this.cursors, true, "player"); // Player
-    this.enemy = new Sprite(this, 500, 100, this.keys, this.cursors, false, "enemy"); // Enemy
+    this.player = new Sprite(this, 100, 0, "player", playerConfig, this.cursors, this.keys); // Player
+    this.enemy = new Sprite(this, 500, 100, "enemy", enemyConfig, this.cursors, this.keys); // Enemy
+
+    this.player.setOpponent(this.enemy);
+    this.enemy.setOpponent(this.player);
 
     this.physics.add.collider(this.player, floor);
     this.physics.add.collider(this.enemy, floor);
