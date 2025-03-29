@@ -2,6 +2,7 @@ import { type AnimationProps, SceneProps } from "./animation.types";
 
 export function registerAnimations(scene: Phaser.Scene) {
   const animations: AnimationProps[] = [
+    { key: "shop", start: 0, end: 5, imgKey: "shop", repeat: -1 },
     { key: "idle", start: 0, end: 7, imgKey: "player", repeat: -1 },
     { key: "run", start: 0, end: 7, imgKey: "playerRun" },
     { key: "jump", start: 0, end: 1, imgKey: "playerJump" },
@@ -9,13 +10,14 @@ export function registerAnimations(scene: Phaser.Scene) {
     { key: "attack", start: 0, end: 5, imgKey: "playerAttack" },
     { key: "death", start: 0, end: 5, imgKey: "playerDeath" },
     { key: "take-hit", start: 0, end: 3, imgKey: "playerTakeHit" },
+
     { key: "idle-enemy", start: 0, end: 3, imgKey: "enemy", repeat: -1 },
     { key: "run-enemy", start: 0, end: 7, imgKey: "enemyRun" },
     { key: "jump-enemy", start: 0, end: 1, imgKey: "enemyJump" },
     { key: "fall-enemy", start: 0, end: 1, imgKey: "enemyFall" },
-    { key: "attack-enemy", start: 0, end: 3, imgKey: "enemyAttack" },
+    { key: "attack-enemy", start: 0, end: 7, imgKey: "enemyAttack" },
     { key: "death-enemy", start: 0, end: 6, imgKey: "enemyDeath" },
-    { key: "take-hit-enemy", start: 0, end: 2, imgKey: "enemyTakeHit" }
+    { key: "take-hit-enemy", start: 0, end: 3, imgKey: "enemyTakeHit" }
   ];
 
   // Loop through and create animations

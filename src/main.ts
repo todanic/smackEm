@@ -2,9 +2,9 @@ import Phaser from "phaser";
 import { registerAnimations } from "./utils/animations";
 import { preloadAssets, playerConfig, enemyConfig } from "./utils/assets";
 import { KeyMap } from "./utils/animation.types";
-import { Sprite } from "./Sprite/Sprite";
+import { Sprite } from "./coomponents/Sprite";
 
-class Example extends Phaser.Scene {
+class SmackEm extends Phaser.Scene {
   private player!: Sprite;
   private enemy!: Sprite;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -30,14 +30,27 @@ class Example extends Phaser.Scene {
   create() {
     this.add
       .image(this.cameras.main.width / 2, this.cameras.main.height / 2, "background")
-      .setOrigin(0.5, 0.5);
-
+      .setOrigin(0.5, 0.5)
+      .setDisplaySize(this.cameras.main.width, this.cameras.main.height);
     registerAnimations(this);
 
     const floor = this.physics.add.staticGroup();
-    floor.create(this.cameras.main.width / 2, 600).setSize(this.cameras.main.width, 180);
-    floor.setVisible(false);
+    floor
+      .create(this.cameras.main.width / 2, this.cameras.main.height * 0.87)
+      .setSize(this.cameras.main.width, 50)
+      .setOrigin(0.5, 0.5)
+      .setVisible(false);
 
+    const shop = this.physics.add.sprite(
+      this.cameras.main.width - 200, // X position
+      0, // Start at the top of the screen (it will fall)
+      "shop"
+    );
+    shop.setScale(3);
+    shop.play("shop"); // Play the animation
+    shop.setCollideWorldBounds(true); // Prevent it from falling out of bounds
+    shop.setGravityY(800); // Apply gravity
+    shop.setBounce(0.2); // Small bounce effect
     if (this.input.keyboard) {
       this.cursors = this.input.keyboard.createCursorKeys();
       this.keys = this.input.keyboard.addKeys({
@@ -56,11 +69,12 @@ class Example extends Phaser.Scene {
 
     this.physics.add.collider(this.player, floor);
     this.physics.add.collider(this.enemy, floor);
+    this.physics.add.collider(shop, floor);
+    this.physics.add.collider(shop, floor);
 
     this.createHealthBars();
+
     // this.createTimer();
-    this.player.on("died", (data: { isPlayer: boolean }) => this.handleDeath(data.isPlayer));
-    this.enemy.on("died", (data: { isPlayer: boolean }) => this.handleDeath(data.isPlayer));
   }
 
   private createTimer() {
@@ -183,30 +197,20 @@ class Example extends Phaser.Scene {
     this.player.update();
     this.enemy.update();
     if (this.gameOver) return;
-    if (this.player.isAttacking) {
-      this.physics.overlap(this.player.attackBox, this.enemy, () => {
-        // When attack box overlaps with the enemy, apply damage
-        this.player.isAttacking = false;
-        this.enemy.takeDamage(50); // Reduce health by 10 (you can adjust this value)
-      });
-    }
-    if (this.enemy.isAttacking) {
-      this.physics.overlap(this.player.attackBox, this.enemy, () => {
-        // When attack box overlaps with the enemy, apply damage
-        this.enemy.isAttacking = false;
-        this.player.takeDamage(50); // Reduce health by 10 (you can adjust this value)
-      });
-    }
     this.drawHealthBar(this.playerHealthBar, this.player.health, 0x00ff00);
     this.drawHealthBar(this.enemyHealthBar, this.enemy.health, 0xff0000);
   }
 }
 
-const config = {
+const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
-  width: 1024,
-  height: 576,
-  scene: Example,
+  width: window.innerWidth,
+  height: window.innerHeight,
+  scene: SmackEm,
+  scale: {
+    mode: Phaser.Scale.RESIZE, // Automatically resizes the game
+    autoCenter: Phaser.Scale.CENTER_BOTH // Centers the game on resize
+  },
   physics: {
     default: "arcade",
     arcade: {
@@ -217,3 +221,7 @@ const config = {
 };
 
 const game = new Phaser.Game(config);
+// window.addEventListener("resize", () => {
+//   const { width, height } = calculateGameSize();
+//   game.scale.resize(width, height);
+// });

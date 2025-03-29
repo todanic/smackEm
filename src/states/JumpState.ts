@@ -1,5 +1,5 @@
 import { BaseState } from "./BaseState";
-import { Sprite } from "../Sprite/Sprite";
+import { Sprite } from "../coomponents/Sprite";
 
 export class JumpState extends BaseState {
   protected sprite: Sprite;
@@ -10,7 +10,7 @@ export class JumpState extends BaseState {
   }
   enter(): void {
     this.sprite.isAnimationInProgress = true;
-    this.sprite.setVelocityY(-400); // Adjust jump height as needed
+    this.sprite.setVelocityY(-600); // Adjust jump height as needed
     this.sprite.play(this.sprite.config.animations.jump, true);
   }
 

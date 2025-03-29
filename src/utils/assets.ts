@@ -2,6 +2,10 @@
 // player and enemy spritesheets for various animations (idle, run, jump, attack, etc.).
 export function preloadAssets(scene: Phaser.Scene) {
   scene.load.image("background", "/images/background.png");
+  scene.load.spritesheet("shop", "/images/shop_anim.png", {
+    frameWidth: 118,
+    frameHeight: 118
+  });
   // Load player spritesheets
   scene.load.spritesheet("player", "/images/martial-hero/Sprites/Idle.png", {
     frameWidth: 200,
@@ -19,7 +23,7 @@ export function preloadAssets(scene: Phaser.Scene) {
     frameWidth: 200,
     frameHeight: 200
   });
-  scene.load.spritesheet("playerAttack", "/images/martial-hero/Sprites/Attack1.png", {
+  scene.load.spritesheet("playerAttack", "/images/martial-hero/Sprites/Attack2.png", {
     frameWidth: 200,
     frameHeight: 200
   });
@@ -48,7 +52,7 @@ export function preloadAssets(scene: Phaser.Scene) {
     frameWidth: 200,
     frameHeight: 200
   });
-  scene.load.spritesheet("enemyAttack", "/images/kenji/Attack1.png", {
+  scene.load.spritesheet("enemyAttack", "/images/kenji/Attack2.png", {
     frameWidth: 200,
     frameHeight: 200
   });
@@ -72,7 +76,7 @@ export const playerConfig = {
     fall: "fall",
     getHit: "take-hit"
   },
-  spriteIndex: 0
+  spriteIndex: 1
 };
 
 export const enemyConfig = {
@@ -85,5 +89,5 @@ export const enemyConfig = {
     fall: "fall-enemy",
     getHit: "take-hit-enemy"
   },
-  spriteIndex: 1
+  spriteIndex: 2
 };

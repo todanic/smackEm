@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { AttackBox } from "./AttackBox";
 import { KeyMap } from "../utils/animation.types";
 import { BaseState } from "../states/BaseState";
 import { IdleState } from "../states/IdleState";
@@ -21,7 +22,7 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
   public isAnimationInProgress: boolean = false;
   public health: number;
   public isAttacking: boolean = false;
-  public attackBox: Phaser.Physics.Arcade.Body;
+  public attackBox: AttackBox;
   public isDead: boolean = false;
   private currentState!: BaseState;
   private states: { [key: string]: BaseState } = {};
@@ -49,22 +50,19 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
     this.scene.add.existing(this);
     this.scene.physics.add.existing(this);
 
-    this.setScale(2, 2);
-    this.body!.setSize(40, 70); // Adjust body size and offset
+    this.setScale(2.5, 2.5);
+    if (this.body) this.body.setSize(40, 50);
     this.setCollideWorldBounds(true);
 
-    // Create the attack box as a physics-enabled sprite
-    const attackBoxRectangle = scene.add.rectangle(0, 0, 120, 50);
-    scene.physics.add.existing(attackBoxRectangle, true); // true means it is a static body
-    this.attackBox = attackBoxRectangle.body as Phaser.Physics.Arcade.Body;
-    attackBoxRectangle.setVisible(false);
+    this.attackBox = new AttackBox(this, scene);
+    this.attackBox.updatePosition();
 
     this.initializeStates();
     this.setActiveState(this.config.animations.idle);
   }
 
   public setActiveState(stateName: string) {
-    if (this.isAnimationInProgress) return;
+    if (this.isAnimationInProgress || !this.states[stateName]) return;
 
     this.currentState = this.states[stateName];
     this.currentState.enter();
@@ -81,59 +79,55 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
   public getInputStates() {
     return {
       attack:
-        this.config.spriteIndex === 0
+        this.config.spriteIndex === 1
           ? Phaser.Input.Keyboard.JustDown(this.keys.SPACE)
           : this.cursors.down.isDown,
       jump:
-        this.config.spriteIndex === 0
+        this.config.spriteIndex === 1
           ? Phaser.Input.Keyboard.JustDown(this.keys.W)
           : this.cursors.up.isDown,
-      left: this.config.spriteIndex === 0 ? this.keys.A.isDown : this.cursors.left.isDown,
-      right: this.config.spriteIndex === 0 ? this.keys.D.isDown : this.cursors.right.isDown
+      left: this.config.spriteIndex === 1 ? this.keys.A.isDown : this.cursors.left.isDown,
+      right: this.config.spriteIndex === 1 ? this.keys.D.isDown : this.cursors.right.isDown
     };
   }
   // Method to handle animation and movement updates
   update() {
     if (this.isDead) return;
-
-    const input = this.getInputStates();
-
-    if (input.left || input.right) {
-      if (!(this.currentState instanceof RunState)) {
-        this.setActiveState(this.config.animations.run);
-      }
-    } else if (input.jump && this.body!.blocked.down) {
-      if (!(this.currentState instanceof JumpState)) {
-        this.setActiveState(this.config.animations.jump);
-      }
-    } else if (input.attack) {
-      if (!(this.currentState instanceof AttackState)) {
-        this.setActiveState(this.config.animations.attack);
-      }
-    } else {
-      if (!(this.currentState instanceof IdleState)) {
-        this.setActiveState(this.config.animations.idle);
-      }
-    }
+    this.attackBox.updatePosition();
+    this.handleInput();
 
     if (this.currentState.update) {
       this.currentState.update(); // Only call update() if it exists
     }
 
-    const xOffset = this.config.spriteIndex === 0 ? 50 : -150;
-    this.attackBox.x = this.x + xOffset;
-    this.attackBox.y = this.y;
+    // const xOffset = this.config.spriteIndex === 1 ? 50 : -150;
+    // this.attackBox.x = this.x + xOffset;
+    // this.attackBox.y = this.y;
   }
+  private handleInput() {
+    const input = this.getInputStates();
+
+    if (input.left || input.right) {
+      this.setActiveState(this.config.animations.run);
+    } else if (input.jump && this.body!.blocked.down) {
+      this.setActiveState(this.config.animations.jump);
+    } else if (input.attack) {
+      this.setActiveState(this.config.animations.attack);
+    } else {
+      this.setActiveState(this.config.animations.idle);
+    }
+  }
+
   takeDamage(amount: number) {
     this.health -= amount;
     console.log(this.health);
     if (this.health <= 0) {
       this.die();
     } else {
-      this.setActiveState(this.config.animations.getHit); // Switch to GetHitState
+      this.setActiveState(this.config.animations.getHit);
     }
   }
   die() {
-    this.setActiveState(this.config.animations.death); // Switch to GetHitState
+    this.setActiveState(this.config.animations.death);
   }
 }

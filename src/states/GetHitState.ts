@@ -1,5 +1,5 @@
 import { BaseState } from "./BaseState";
-import { Sprite } from "../Sprite/Sprite";
+import { Sprite } from "../coomponents/Sprite";
 
 export class GetHitState extends BaseState {
   constructor(sprite: Sprite) {

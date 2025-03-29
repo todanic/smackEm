@@ -1,4 +1,4 @@
-import { Sprite } from "../Sprite/Sprite";
+import { Sprite } from "../coomponents/Sprite";
 
 export interface SceneProps {
   scene: Phaser.Scene;
